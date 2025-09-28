@@ -1,15 +1,29 @@
 # Fraud Detection Analysis:
 A Deep Dive into Model Evaluation
 This repository contains the code, data, and presentation for an end-to-end machine learning project focused on detecting fraudulent bank transactions. The project goes beyond simple model building to diagnose common challenges like class imbalance and provides a final, strategic recommendation based on a rigorous analytical process.
+
+---
+
+## 🚀 Interactive Report Dashboard (Live Demo)
+
+To make the findings of this project easily accessible and understandable, I have created a single-page interactive web application (`index.html`) that tells the complete story of the analysis.
+
+**Why is this here?** This interactive report is a much more engaging and effective way to present the project's journey than a static notebook. It allows anyone (technical or not) to explore the results and understand the key takeaways.
+
+### **[Click Here to View the Live Interactive Report](https://nayan9572.github.io/Fraud-Detection-Analysis/)**
+
+---
 # The Business Problem
 Banks and financial institutions face significant financial losses from fraudulent activities. The goal of this project was to develop a machine learning system capable of accurately identifying fraudulent transactions in real-time while minimizing the disruption to legitimate customers. The core technical challenge was a severe class imbalance, with fraudulent transactions making up less than 5% of the total dataset.
 
 # Repository Contents
+**index.html:**A single-page web application that serves as the interactive report for this project.
 **Fraud Detection analysis assignment.ipynb:** The main Jupyter Notebook containing all the Python code for data analysis, preprocessing, model building, and evaluation.
 
 **Fraud Detection Presentation.pptx:** A slide deck that summarizes the project's journey, key findings, and final recommendation.
 
 **fraud_data.xlsx:** The dataset used for this analysis.
+
 
 # The Analytical Journey & Key Findings
 This project followed a deliberate, iterative process that tells a common story in real-world data science.
