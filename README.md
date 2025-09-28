@@ -30,11 +30,11 @@ The rigorous testing proves that the predictive "signal" from the current featur
 The most impactful next step is to create more powerful, context-rich features (e.g., avg_amount_vs_user_historical_avg) to provide a stronger signal for a model to learn from.
 
 # How to Run This Project
-**1.Clone the repository:**
+**1. Clone the repository:**
 
 git clone [https://github.com/nayan9572/Fraud-Detection-Analysis.git](https://github.com/nayan9572/Fraud-Detection-Analysis.git)
 
-**Install the required libraries:**
+**2. Install the required libraries:**
 (Note: You will need openpyxl to read .xlsx files with pandas)
 
 pip install pandas scikit-learn matplotlib seaborn imbalanced-learn xgboost jupyter openpyxl
