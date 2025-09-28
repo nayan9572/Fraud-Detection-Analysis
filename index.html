@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Fraud Detection Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Subtle Analytics (Slate Gray, Indigo, Emerald Green, Rose Red) -->
+    <!-- Application Structure Plan: A story-driven, single-page application that guides the user through the analytical journey of the fraud detection project. The structure is linear, starting with the problem, exploring failed attempts (the 'Accuracy Trap'), introducing a solution (SMOTE), and featuring an interactive dashboard to compare post-SMOTE model results. It concludes with the final diagnosis and strategic recommendation. This narrative structure was chosen because it's more engaging and effectively communicates the project's key insights—that the process of discovery is more important than the final model—which is superior to a static, non-contextual dashboard for this specific report. -->
+    <!-- Visualization & Content Choices: Report Info: Class Imbalance -> Goal: Inform -> Viz: Chart.js Bar Chart -> Justification: Clearly shows the core problem. | Report Info: Model performance metrics (Recall, Precision) -> Goal: Compare -> Viz: Interactive Chart.js Grouped Bar Chart + Dynamic HTML Confusion Matrix -> Interaction: User clicks buttons to select a model -> Justification: Allows direct, interactive comparison of the models' strengths and weaknesses, highlighting the Recall/Precision trade-off which is central to the project's findings. | Report Info: Final Recommendation -> Goal: Recommend -> Viz: Styled HTML/CSS list with icons -> Justification: Presents the strategic, actionable next steps in a clear and visually appealing format. All visualizations use Canvas or HTML/CSS, confirming no SVG/Mermaid usage. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .step-marker {
+            background-color: #4f46e5; /* indigo-600 */
+        }
+        .active-btn {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .inactive-btn {
+            background-color: white;
+            color: #374151; /* gray-700 */
+        }
+        .metric-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Fraud Detection Analysis</h1>
+            <p class="text-slate-500 mt-1">An Interactive Report on Model Evaluation and Strategy</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <!-- Section 1: The Core Challenge -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+                <span class="step-marker text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">1</span>
+                The Core Challenge: Severe Class Imbalance
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center bg-white p-6 rounded-lg shadow">
+                <div class="text-slate-600 space-y-4">
+                    <p>The primary obstacle in this project is the "needle in a haystack" problem. Fraudulent transactions are extremely rare compared to legitimate ones, creating a severe class imbalance in the dataset.</p>
+                    <p>This imbalance causes most machine learning models to become biased. They achieve high accuracy by simply predicting every transaction as legitimate, completely failing at the primary goal of detecting fraud.</p>
+                </div>
+                <div>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="classDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Accuracy Trap -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+                <span class="step-marker text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">2</span>
+                The Accuracy Trap: Why 95% is a Failure
+            </h2>
+            <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-6 rounded-r-lg shadow">
+                <h3 class="font-bold text-lg mb-2">A Critical Insight</h3>
+                <p>Initial models built on the imbalanced data showed a misleading 95% accuracy. However, a deeper look revealed a **Fraud Recall of 0.00**. The models were catching **ZERO** fraudulent transactions, making them completely useless for the business.</p>
+            </div>
+        </section>
+        
+        <!-- Section 3: The Solution and Interactive Analysis -->
+        <section class="mb-12">
+             <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+                <span class="step-marker text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">3</span>
+                Interactive Analysis: Post-SMOTE Model Performance
+            </h2>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-slate-600 mb-6">To solve the imbalance, **SMOTE (Synthetic Minority Over-sampling Technique)** was used to create a balanced training dataset. This forces the models to learn the patterns of fraud. Explore the results of different models trained on this balanced data below.</p>
+                
+                <div class="flex justify-center space-x-2 md:space-x-4 mb-8">
+                    <button id="btn-lr" class="model-btn active-btn font-semibold py-2 px-4 rounded-lg transition-all duration-300">Logistic Regression</button>
+                    <button id="btn-rf" class="model-btn inactive-btn font-semibold py-2 px-4 rounded-lg transition-all duration-300">Random Forest</button>
+                    <button id="btn-xgb" class="model-btn inactive-btn font-semibold py-2 px-4 rounded-lg transition-all duration-300">XGBoost</button>
+                </div>
+
+                <div id="dashboard" class="fade-in">
+                    <div class="grid md:grid-cols-3 gap-4 mb-8 text-center">
+                        <div class="metric-card bg-slate-100 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-slate-500">Overall Accuracy</h4>
+                            <p id="metric-accuracy" class="text-3xl font-bold text-slate-900"></p>
+                        </div>
+                        <div class="metric-card bg-emerald-100 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-emerald-600">Fraud Recall</h4>
+                            <p id="metric-recall" class="text-3xl font-bold text-emerald-800"></p>
+                        </div>
+                        <div class="metric-card bg-amber-100 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-amber-600">Fraud Precision</h4>
+                            <p id="metric-precision" class="text-3xl font-bold text-amber-800"></p>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-5 gap-8 items-start">
+                        <div class="lg:col-span-3">
+                             <div class="chart-container h-80">
+                                <canvas id="modelPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-lg mb-2 text-slate-700">Confusion Matrix</h3>
+                            <div class="grid grid-cols-2 gap-px bg-slate-300 border border-slate-300 rounded-lg overflow-hidden">
+                                <div class="bg-white p-4">
+                                    <p class="text-xs text-slate-500">Predicted: Not Fraud</p>
+                                    <p class="text-xs text-slate-500">Actual: Not Fraud</p>
+                                    <p id="cm-tn" class="text-2xl font-bold text-slate-700 mt-1"></p>
+                                </div>
+                                <div class="bg-amber-50 p-4">
+                                    <p class="text-xs text-amber-600">Predicted: Fraud</p>
+                                    <p class="text-xs text-slate-500">Actual: Not Fraud</p>
+                                    <p id="cm-fp" class="text-2xl font-bold text-amber-800 mt-1"></p>
+                                </div>
+                                <div class="bg-rose-50 p-4">
+                                    <p class="text-xs text-slate-500">Predicted: Not Fraud</p>
+                                    <p class="text-xs text-rose-600">Actual: Fraud</p>
+                                    <p id="cm-fn" class="text-2xl font-bold text-rose-800 mt-1"></p>
+                                </div>
+                                <div class="bg-emerald-50 p-4">
+                                    <p class="text-xs text-emerald-600">Predicted: Fraud</p>
+                                    <p class="text-xs text-emerald-600">Actual: Fraud</p>
+                                    <p id="cm-tp" class="text-2xl font-bold text-emerald-800 mt-1"></p>
+                                </div>
+                            </div>
+                            <div id="analysis-text" class="mt-4 bg-slate-50 p-4 rounded-lg text-slate-600"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 4: Final Conclusion -->
+         <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">
+                <span class="step-marker text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">4</span>
+                Final Diagnosis & Strategic Recommendation
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8 bg-white p-6 rounded-lg shadow">
+                 <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 p-6 rounded-r-lg">
+                    <h3 class="font-bold text-lg mb-2">Conclusion: It's a Data Problem, Not a Model Problem</h3>
+                    <p>Rigorous testing, including hyperparameter tuning, proved that no model could reliably detect fraud with the current features. The predictive "signal" from the data is too weak.</p>
+                    <p class="mt-2">The final recommendation is to shift focus from model tuning to **data enhancement and feature engineering**.</p>
+                </div>
+                 <div class="space-y-4">
+                    <h3 class="font-bold text-lg text-slate-700">Actionable Next Steps: Engineer a Stronger Signal</h3>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-indigo-600">&#128182;</span>
+                        <div>
+                            <h4 class="font-semibold">Behavioral Features</h4>
+                            <p class="text-sm text-slate-500">Create features like `avg_amount_vs_user_historical_avg` to spot anomalies in spending.</p>
+                        </div>
+                    </div>
+                     <div class="flex items-start space-x-3">
+                        <span class="text-indigo-600">&#9200;</span>
+                        <div>
+                            <h4 class="font-semibold">Time-Based Features</h4>
+                            <p class="text-sm text-slate-500">Calculate `time_since_last_transaction` to detect rapid, unusual activity.</p>
+                        </div>
+                    </div>
+                     <div class="flex items-start space-x-3">
+                        <span class="text-indigo-600">&#127758;</span>
+                        <div>
+                            <h4 class="font-semibold">Location-Based Features</h4>
+                            <p class="text-sm text-slate-500">Check `is_transaction_location_new_for_user` to flag geographically improbable transactions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-500 text-sm">
+        <p>Interactive Report generated from a Machine Learning analysis project.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Data Store ---
+            const classData = {
+                labels: ['Legitimate', 'Fraud'],
+                datasets: [{
+                    label: 'Number of Transactions',
+                    data: [475, 25],
+                    backgroundColor: ['#64748b', '#ef4444'], // slate-500, red-500
+                    borderColor: ['#94a3b8', '#f87171'],   // slate-400, red-400
+                    borderWidth: 1
+                }]
+            };
+
+            const modelData = {
+                'lr': {
+                    accuracy: '57%',
+                    recall: '60%',
+                    precision: '7%',
+                    confusionMatrix: { tn: 54, fp: 41, fn: 2, tp: 3 },
+                    chartData: { recall: 0.60, precision: 0.07 },
+                    analysis: 'A huge breakthrough! This model now catches 60% of frauds. However, its low precision means it creates many false alarms—a classic trade-off.'
+                },
+                'rf': {
+                    accuracy: '93%',
+                    recall: '0%',
+                    precision: '0%',
+                    confusionMatrix: { tn: 93, fp: 2, fn: 5, tp: 0 },
+                    chartData: { recall: 0.00, precision: 0.00 },
+                    analysis: 'A critical insight. Even after balancing the data with SMOTE, this powerful model still completely fails to identify any fraud with its default settings.'
+                },
+                'xgb': {
+                    accuracy: '92%',
+                    recall: '0%',
+                    precision: '0%',
+                    confusionMatrix: { tn: 92, fp: 3, fn: 5, tp: 0 },
+                    chartData: { recall: 0.00, precision: 0.00 },
+                    analysis: 'This confirms our finding. The industry-standard XGBoost also fails "out-of-the-box", proving the problem is deeper than just model choice. The data signal is too weak.'
+                }
+            };
+            
+            // --- Chart Instances ---
+            let classDistChart, modelPerfChart;
+
+            // --- Initial Chart Rendering ---
+            const ctxClass = document.getElementById('classDistributionChart').getContext('2d');
+            classDistChart = new Chart(ctxClass, {
+                type: 'bar',
+                data: classData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Transaction Class Distribution' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+                    }
+                }
+            });
+
+            const ctxModel = document.getElementById('modelPerformanceChart').getContext('2d');
+            modelPerfChart = new Chart(ctxModel, {
+                type: 'bar',
+                data: {
+                    labels: ['Fraud Recall', 'Fraud Precision'],
+                    datasets: [{
+                        label: 'Model Score',
+                        data: [],
+                        backgroundColor: ['#10b981', '#f59e0b'], // emerald-500, amber-500
+                        borderColor: ['#059669', '#d97706'],   // emerald-600, amber-600
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Model Performance on Fraud Class' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return (context.raw * 100).toFixed(0) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            max: 1,
+                            ticks: {
+                                callback: function(value) {
+                                    return value * 100 + '%'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- UI Update Function ---
+            function updateDashboard(modelKey) {
+                const data = modelData[modelKey];
+                
+                // Animate dashboard on change
+                const dashboardEl = document.getElementById('dashboard');
+                dashboardEl.classList.remove('fade-in');
+                void dashboardEl.offsetWidth; // Trigger reflow
+                dashboardEl.classList.add('fade-in');
+
+                // Update metric cards
+                document.getElementById('metric-accuracy').textContent = data.accuracy;
+                document.getElementById('metric-recall').textContent = data.recall;
+                document.getElementById('metric-precision').textContent = data.precision;
+
+                // Update confusion matrix
+                document.getElementById('cm-tn').textContent = data.confusionMatrix.tn;
+                document.getElementById('cm-fp').textContent = data.confusionMatrix.fp;
+                document.getElementById('cm-fn').textContent = data.confusionMatrix.fn;
+                document.getElementById('cm-tp').textContent = data.confusionMatrix.tp;
+
+                // Update analysis text
+                document.getElementById('analysis-text').textContent = data.analysis;
+
+                // Update chart
+                modelPerfChart.data.datasets[0].data = [data.chartData.recall, data.chartData.precision];
+                modelPerfChart.update();
+
+                // Update button styles
+                document.querySelectorAll('.model-btn').forEach(btn => {
+                    btn.classList.remove('active-btn');
+                    btn.classList.add('inactive-btn');
+                });
+                document.getElementById(`btn-${modelKey}`).classList.add('active-btn');
+                document.getElementById(`btn-${modelKey}`).classList.remove('inactive-btn');
+            }
+
+            // --- Event Listeners ---
+            document.querySelectorAll('.model-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const modelKey = event.target.id.split('-')[1];
+                    updateDashboard(modelKey);
+                });
+            });
+
+            // --- Initial Load ---
+            updateDashboard('lr'); 
+        });
+    </script>
+</body>
+</html>
